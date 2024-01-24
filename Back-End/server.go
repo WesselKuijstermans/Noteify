@@ -1,13 +1,24 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"noteify-api/database"
+	"noteify-api/routers"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	db, err := database.ConnectDB()
+	log.Print(db)
+	if err != nil {
+		panic("failed to connect database")
+	}
+	r := routers.SetupRouter()
+
+	// Route for initiating the OAuth2 flow
+	r.GET("/auth/google/login", handleGoogleLogin)
+
+	// Route for handling the callback from Google
+	r.GET("/auth/google/callback", handleGoogleCallback)
+
 	r.Run()
 }
